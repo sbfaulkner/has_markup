@@ -24,7 +24,7 @@ module HasMarkup
       when 'Textile'
         RedCloth.new(colourize(markup)).to_html
       else
-        "<p>#{markup}</p>"
+        simple_format(markup)
       end
     end
 

@@ -48,7 +48,7 @@ module HasMarkup
 
         prefix, lines = code.inner_html.match(/(\r?\n)?(.*)/m).to_a[1,2]
 
-        code.swap "#{prefix}#{Uv.parse(lines, 'xhtml', language, numbers, theme).gsub!(/\\$/, '&not;')}"
+        code.swap "#{prefix}#{Uv.parse(lines, 'xhtml', language, numbers, theme).gsub(/\\$/, '&not;')}"
       end
       doc.to_s
     end

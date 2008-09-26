@@ -2,7 +2,7 @@ module HasMarkup
   def self.included(base)
     base.extend ClassMethods
   end
-
+  
   THEME = 'mac_classic'
   LANGUAGE = 'ruby_on_rails'
   NUMBERS = true
@@ -12,6 +12,7 @@ module HasMarkup
       attr_names.each do |attr_name|
         before_save "self.#{attr_name}_html = self.class.markup(#{attr_name}, #{attr_name}_markup)"
         validates_inclusion_of "#{attr_name}_markup", :in => %w(HTML Markdown Plain\ text Textile), :unless => "#{attr_name}.blank?"
+        class_eval "def #{attr_name}_text; @#{attr_name}_plain_text ||= Hpricot(#{attr_name}_html.gsub(/&[a-z]+?;/,'')).to_plain_text; end", __FILE__, __LINE__
       end
     end
     

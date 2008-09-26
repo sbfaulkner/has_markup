@@ -1,3 +1,5 @@
-config.gem "hpricot", :version => '0.6', :source => "http://code.whytheluckystiff.net"
+config.gem 'hpricot', :source => "http://code.whytheluckystiff.net"
+config.gem 'ultraviolet', :lib => 'uv'
+config.gem 'rdiscount'
 
 ActiveRecord::Base.send :include, HasMarkup

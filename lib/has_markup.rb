@@ -20,7 +20,7 @@ module HasMarkup
       when 'HTML'
         colourize(markup)
       when 'Markdown'
-        BlueCloth.new(colourize(markup)).to_html
+        RDiscount.new(colourize(markup)).to_html
       when 'Textile'
         RedCloth.new(colourize(markup)).to_html
       else
@@ -47,7 +47,7 @@ module HasMarkup
 
         prefix, lines = code.inner_html.match(/(\r?\n)?(.*)/m).to_a[1,2]
 
-        code.swap "#{prefix}#{Uv.parse(lines, 'xhtml', language, numbers, theme)}"
+        code.swap "#{prefix}#{Uv.parse(lines, 'xhtml', language, numbers, theme).gsub!(/\\$/, '&not;')}"
       end
       doc.to_s
     end

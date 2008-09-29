@@ -1,11 +1,9 @@
+begin require 'rdiscount' BlueCloth = RDiscount rescue LoadError require 'bluecloth' end
+  
 module HasMarkup
   def self.included(base)
     base.extend ClassMethods
   end
-  
-  THEME = 'mac_classic'
-  LANGUAGE = 'ruby_on_rails'
-  NUMBERS = true
   
   module ClassMethods
     def has_markup(*attr_names)
@@ -21,7 +19,7 @@ module HasMarkup
       when 'HTML'
         colourize(markup)
       when 'Markdown'
-        RDiscount.new(colourize(markup)).to_html
+        BlueCloth.new(colourize(markup)).to_html
       when 'Textile'
         RedCloth.new(colourize(markup)).to_html
       else
@@ -29,28 +27,39 @@ module HasMarkup
       end
     end
 
-    def colourize(text, options = {})
-      doc = Hpricot(text)
-      doc.search("//code") do |code|
-        theme = code.get_attribute(:theme) || options[:theme]
-        language = code.get_attribute(:language) || options[:language]
-        numbers = case code.get_attribute(:numbers)
-                  when NilClass
-                    options[:numbers].nil? ? NUMBERS : options[:numbers]
-                  when 'numbers'
-                    true
-                  else
-                    false
-                  end
+    if defined?(Uv)
+      THEME = 'mac_classic'
+      LANGUAGE = 'ruby_on_rails'
+      NUMBERS = true
 
-        theme = THEME if ! Uv.themes.include? theme
-        language = LANGUAGE unless Uv.syntaxes.include? language
+      def colourize(text, options = {})
+        doc = Hpricot(text)
+        doc.search("//code") do |code|
+          theme = code.get_attribute(:theme) || options[:theme]
+          language = code.get_attribute(:language) || options[:language]
+          numbers = case code.get_attribute(:numbers)
+                    when NilClass
+                      options[:numbers].nil? ? NUMBERS : options[:numbers]
+                    when 'numbers'
+                      true
+                    else
+                      false
+                    end
 
-        prefix, lines = code.inner_html.match(/(\r?\n)?(.*)/m).to_a[1,2]
+          theme = THEME if ! Uv.themes.include? theme
+          language = LANGUAGE unless Uv.syntaxes.include? language
 
-        code.swap "#{prefix}#{Uv.parse(lines, 'xhtml', language, numbers, theme).gsub(/\\$/, '&not;')}"
+          prefix, lines = code.inner_html.match(/(\r?\n)?(.*)/m).to_a[1,2]
+
+          code.swap "#{prefix}#{Uv.parse(lines, 'xhtml', language, numbers, theme).gsub(/\\$/, '&not;')}"
+        end
+        doc.to_s
       end
-      doc.to_s
+    else
+      # TODO: find alternative for Uv
+      def colourize(text, options = {})
+        text
+      end
     end
   end
 end

@@ -1,4 +1,9 @@
-begin require 'rdiscount' BlueCloth = RDiscount rescue LoadError require 'bluecloth' end
+begin
+  require 'rdiscount'
+  BlueCloth = RDiscount
+rescue LoadError
+  require 'bluecloth'
+end
   
 module HasMarkup
   def self.included(base)

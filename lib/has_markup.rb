@@ -10,13 +10,13 @@ module HasMarkup
     base.extend ClassMethods
   end
   
+  MARKUP_TYPES = %w(HTML Markdown Plain\ text Textile)
+  
   module ClassMethods
-    MARKUP_TYPES = %w(HTML Markdown Plain\ text Textile)
-    
     def has_markup(*attr_names)
       attr_names.each do |attr_name|
         before_save "self.#{attr_name}_html = self.class.markup(#{attr_name}, #{attr_name}_markup)"
-        validates_inclusion_of "#{attr_name}_markup", :in => MARKUP_TYPES, :unless => "#{attr_name}.blank?"
+        validates_inclusion_of "#{attr_name}_markup", :in => HasMarkup::MARKUP_TYPES, :unless => "#{attr_name}.blank?"
         class_eval "def #{attr_name}_text; @#{attr_name}_plain_text ||= Hpricot(#{attr_name}_html.gsub(/&[a-z]+?;/,'')).to_plain_text; end", __FILE__, __LINE__
       end
     end
@@ -46,15 +46,15 @@ module HasMarkup
           language = code.get_attribute(:language) || options[:language]
           numbers = case code.get_attribute(:numbers)
                     when NilClass
-                      options[:numbers].nil? ? NUMBERS : options[:numbers]
+                      options[:numbers].nil? ? HasMarkup::NUMBERS : options[:numbers]
                     when 'numbers'
                       true
                     else
                       false
                     end
 
-          theme = THEME if ! Uv.themes.include? theme
-          language = LANGUAGE unless Uv.syntaxes.include? language
+          theme = HasMarkup::THEME if ! Uv.themes.include? theme
+          language = HasMarkup::LANGUAGE unless Uv.syntaxes.include? language
 
           prefix, lines = code.inner_html.match(/(\r?\n)?(.*)/m).to_a[1,2]
 

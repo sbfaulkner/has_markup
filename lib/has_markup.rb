@@ -11,10 +11,12 @@ module HasMarkup
   end
   
   module ClassMethods
+    MARKUP_TYPES = %w(HTML Markdown Plain\ text Textile)
+    
     def has_markup(*attr_names)
       attr_names.each do |attr_name|
         before_save "self.#{attr_name}_html = self.class.markup(#{attr_name}, #{attr_name}_markup)"
-        validates_inclusion_of "#{attr_name}_markup", :in => %w(HTML Markdown Plain\ text Textile), :unless => "#{attr_name}.blank?"
+        validates_inclusion_of "#{attr_name}_markup", :in => MARKUP_TYPES, :unless => "#{attr_name}.blank?"
         class_eval "def #{attr_name}_text; @#{attr_name}_plain_text ||= Hpricot(#{attr_name}_html.gsub(/&[a-z]+?;/,'')).to_plain_text; end", __FILE__, __LINE__
       end
     end
@@ -28,7 +30,7 @@ module HasMarkup
       when 'Textile'
         RedCloth.new(colourize(markup)).to_html
       else
-        simple_format(markup)
+        "<p>#{markup}</p>"
       end
     end
 

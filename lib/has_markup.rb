@@ -34,39 +34,27 @@ module HasMarkup
       end
     end
 
-    if defined?(Uv)
-      THEME = 'mac_classic'
-      LANGUAGE = 'ruby_on_rails'
-      NUMBERS = true
+    LANGUAGE = 'rb'
+    NUMBERS = true
 
-      def colourize(text, options = {})
-        doc = Hpricot(text)
-        doc.search("//code") do |code|
-          theme = code.get_attribute(:theme) || options[:theme]
-          language = code.get_attribute(:language) || options[:language]
-          numbers = case code.get_attribute(:numbers)
-                    when NilClass
-                      options[:numbers].nil? ? HasMarkup::NUMBERS : options[:numbers]
-                    when 'numbers'
-                      true
-                    else
-                      false
-                    end
+    def colourize(text, options = {})
+      doc = Hpricot(text)
+      doc.search("//code") do |code|
+        language = code.get_attribute(:language) || options[:language]
+        numbers = case code.get_attribute(:numbers)
+                  when NilClass
+                    options[:numbers].nil? ? HasMarkup::NUMBERS : options[:numbers]
+                  when 'numbers'
+                    true
+                  else
+                    false
+                  end
 
-          theme = HasMarkup::THEME if ! Uv.themes.include? theme
-          language = HasMarkup::LANGUAGE unless Uv.syntaxes.include? language
+        prefix, lines = code.inner_html.match(/(\r?\n)?(.*)/m).to_a[1,2]
 
-          prefix, lines = code.inner_html.match(/(\r?\n)?(.*)/m).to_a[1,2]
-
-          code.swap "#{prefix}#{Uv.parse(lines, 'xhtml', language, numbers, theme).gsub(/\\$/, '&not;')}"
-        end
-        doc.to_s
+        code.swap "#{prefix}#{lines.highlight(:language => language, :line_numbers => numbers).gsub(/\\$/, '&not;')}"
       end
-    else
-      # TODO: find alternative for Uv
-      def colourize(text, options = {})
-        text
-      end
+      doc.to_s
     end
   end
 end

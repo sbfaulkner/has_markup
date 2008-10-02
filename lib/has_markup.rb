@@ -11,6 +11,8 @@ module HasMarkup
   end
   
   MARKUP_TYPES = %w(HTML Markdown Plain\ text Textile)
+  MARKUP_LANGUAGE = ''
+  MARKUP_NUMBERS = true
   
   module ClassMethods
     def has_markup(*attr_names)
@@ -34,16 +36,13 @@ module HasMarkup
       end
     end
 
-    LANGUAGE = 'rb'
-    NUMBERS = true
-
     def colourize(text, options = {})
       doc = Hpricot(text)
       doc.search("//code") do |code|
-        language = code.get_attribute(:language) || options[:language]
+        language = code.get_attribute(:language) || options[:language] || HasMarkup::LANGUAGE
         numbers = case code.get_attribute(:numbers)
                   when NilClass
-                    options[:numbers].nil? ? HasMarkup::NUMBERS : options[:numbers]
+                    options[:numbers].nil? ? HasMarkup::MARKUP_NUMBERS : options[:numbers]
                   when 'numbers'
                     true
                   else

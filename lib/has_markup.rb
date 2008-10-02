@@ -39,7 +39,7 @@ module HasMarkup
     def colourize(text, options = {})
       doc = Hpricot(text)
       doc.search("//code") do |code|
-        language = code.get_attribute(:language) || options[:language] || HasMarkup::LANGUAGE
+        language = code.get_attribute(:language) || options[:language] || HasMarkup::MARKUP_LANGUAGE
         numbers = case code.get_attribute(:numbers)
                   when NilClass
                     options[:numbers].nil? ? HasMarkup::MARKUP_NUMBERS : options[:numbers]

@@ -17,7 +17,8 @@ module HasMarkup
   module ClassMethods
     def has_markup(*attr_names)
       attr_names.each do |attr_name|
-        before_save "self.#{attr_name}_html = self.class.markup(#{attr_name}, #{attr_name}_markup)"
+        class_eval "def markup_#{attr_name}; self.#{attr_name}_html = self.class.markup(#{attr_name}, #{attr_name}_markup); end; protected :markup_#{attr_name}"
+        before_save "markup_#{attr_name}".to_sym
         validates_inclusion_of "#{attr_name}_markup", :in => HasMarkup::MARKUP_TYPES, :unless => "#{attr_name}.blank?"
         class_eval "def #{attr_name}_text; @#{attr_name}_plain_text ||= Hpricot(#{attr_name}_html.gsub(/&[a-z]+?;/,'')).to_plain_text; end", __FILE__, __LINE__
       end
